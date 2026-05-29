@@ -146,11 +146,17 @@ export const updateDoctorProfile = async (req, res) => {
     doctor.available = req.body.available !== undefined ? req.body.available : doctor.available;
     doctor.image = req.body.image || doctor.image;
 
-    // Update name if changed
+    // Update User model (name or image) if changed
+    const userUpdates = {};
     if (req.body.name) {
       doctor.name = req.body.name;
-      // Also update in User credentials
-      await User.findByIdAndUpdate(req.user._id, { name: req.body.name });
+      userUpdates.name = req.body.name;
+    }
+    if (req.body.image) {
+      userUpdates.image = req.body.image;
+    }
+    if (Object.keys(userUpdates).length > 0) {
+      await User.findByIdAndUpdate(req.user._id, userUpdates);
     }
 
     const updatedDoctor = await doctor.save();
